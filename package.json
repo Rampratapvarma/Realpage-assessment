@@ -1,0 +1,25 @@
+{
+  "name": "realpage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rampratapvarma/Realpage-assessment.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rampratapvarma/Realpage-assessment/issues"
+  },
+  "homepage": "https://github.com/Rampratapvarma/Realpage-assessment#readme",
+  "dependencies": {
+    "express": "^4.21.1",
+    "fs": "^0.0.1-security",
+    "multer": "^1.4.5-lts.1",
+    "worker-thread": "^1.1.0"
+  }
+}

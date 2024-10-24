@@ -1,0 +1,8 @@
+node_modules/
+npm-debug.log
+.env
+
+# React
+reactapp/node_modules/
+reactapp/build/
+reactapp/.env

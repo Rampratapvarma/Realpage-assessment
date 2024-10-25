@@ -1,55 +1,85 @@
-import './App.css';
-import { useState, useEffect } from 'react';
+import "./App.css";
+import { useState, useEffect } from "react";
 
 function App() {
   const [data, setData] = useState(null);
-  const [error, setError] = useState(null); 
-  const [htmlmsg,setHtmlmsg]=useState(false)
-  const [loading,setLoading]=useState(true)
- 
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const handleError = (message) => {
+    setError(message);
+    setLoading(false);
+  };
+
+  // Function to fetch last chapter summary based on book ID
+  const fetchLastChapterSummary = async (bookId) => {
+    try {
+      // Fetch chapters for the book
+      const chaptersResponse = await fetch(
+        `https://api.potterdb.com/v1/books/${bookId}/chapters`
+      );
+      if (!chaptersResponse.ok) {
+        throw new Error("Failed to fetch chapters");
+      }
+
+      const chaptersData = await chaptersResponse.json();
+      const chapters = chaptersData.data;
+
+      // Fetch only the last chapter
+      if (chapters.length > 0) {
+        const lastChapterId = chapters[chapters.length - 1].id;
+        const lastChapterResponse = await fetch(
+          `https://api.potterdb.com/v1/books/${bookId}/chapters/${lastChapterId}`
+        );
+
+        if (!lastChapterResponse.ok) {
+          throw new Error("Failed to fetch last chapter");
+        }
+
+        const lastChapterData = await lastChapterResponse.json();
+        setData(lastChapterData.data.attributes.summary);
+        console.log(lastChapterData.data.attributes.summary);
+      } else {
+        handleError("No chapters found");
+      }
+    } catch (error) {
+      handleError(`Error fetching chapters: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch book and trigger last chapter fetch
+  const fetchBookData = async () => {
+    try {
+      const response = await fetch("https://api.potterdb.com/v1/books");
+      if (!response.ok) {
+        throw new Error("Failed to fetch books");
+      }
+
+      const booksData = await response.json();
+      const firstBookId = booksData.data[0].id;
+
+      if (firstBookId) {
+        fetchLastChapterSummary(firstBookId);
+      } else {
+        handleError("No books found");
+      }
+    } catch (error) {
+      handleError(`Error fetching books: ${error.message}`);
+    }
+  };
+
   useEffect(() => {
-    fetch('https://docs.potterdb.com/apis/rest')
-      .then((res) => {
-        // Check if the response is JSON
-        if (res.ok && res.headers.get('content-type').includes('application/json')) {
-          return res.json(); // Parse JSON response
-        } else if (res.ok) {
-          setHtmlmsg(true)
-          return res.text(); // Handle non-JSON content (like HTML)
-        } else {
-          throw new Error(`HTTP error! Status: ${res.status}`); // Handle HTTP errors
-        }
-      })
-      .then((resp) => {
-        if (!resp || resp.length === 0) {
-          throw new Error('No data available'); // Handle empty response
-        }
-       console.log('Response:', resp);
-        setData(resp); // Store data in state if valid
-      })
-      .catch((err) => {
-        console.error('There was a problem with the fetch operation:', err);
-        setError(err.message); // Store error message
-      }).finally(()=>{
-        setLoading(false)
-      })
+    fetchBookData();
   }, []);
 
   return (
     <div className="App">
-    {htmlmsg? (<><h1>Received HTMl text instead of JSON object so couldn't fetch books </h1>
-    <h1>check the console to see the html response</h1>
-    </>):
-    (
-    <>
-    <h1>Data Fetched:</h1>
-    <h2>{loading? "loading.......":error ? "Error : " + error : JSON.stringify(data)}</h2>
-    </>)
-}
-  </div>
- 
+      <h1>Data Fetched:</h1>
+      <h2>{loading ? "Loading..." : error ? error : data}</h2>
+    </div>
   );
 }
 
 export default App;
-  
